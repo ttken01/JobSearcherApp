@@ -1,0 +1,120 @@
+{% extends 'admin/base_site.html' %}
+{% block extrahead %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+{% block content %}
+<h1 class="text-center text-danger">THỐNG KÊ THÔNG TIN CÁC KHOÁ HỌC</h1>
+<h4 class="text-center text-success">Số lượng bài đăng: {{ count }}</h4>
+<div class="container">
+    <div class="row row-cols-2">
+        <div class="col">
+            <h2>Bảng thống kê</h2>
+            <p>Bảng thống kê số lượng người ứng tuyển theo ngành nghề</p>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Mã ngành</th>
+                    <th>Tên ngành</th>
+                    <th>Số lượng ứng tuyển</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for s in stats %}
+                <tr>
+                    <td>{{ s.id }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.count }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <form method="post">{% csrf_token %}
+                <div class="form-group">
+                    <div>
+                        <lable for="quarterly">Theo Quý</lable>
+                    </div>
+                    <select class="form-control col-md-6" name="quarterly" id="quarterly">
+                        <option></option>
+                        <option value="1">Quý 1(tháng 1,2,3)</option>
+                        <option value="2">Quý 2(tháng 4,5,6)</option>
+                        <option value="3">Quý 3(tháng 7,8,9)</option>
+                        <option value="4">Quý 4(tháng 10,11,12)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div>
+                        <lable for="kw">Tên ngành</lable>
+                    </div>
+                    <input type="text" class="form-control" name="kw" placeholder="Nhap tu khoa...">
+                </div>
+                <div class="form-group">
+                    <div>
+                        <lable for="years">Năm</lable>
+                    </div>
+                    <select class="form-control col-md-6" name="years" id="years">
+                        <option></option>
+                        {% for a in years %}
+                        <option value="{{ a.ye }}">{{ a.ye }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="submit" value="Thống kê" width="30px" style="margin: 10px" height="20px"
+                       class="btn btn-info text-center">
+
+            </form>
+            <canvas id="myChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let lables = [], counter=[], colors = [], borderColors = []
+      let r, g, b
+      {% for s in stats %}
+        lables.push('{{ s.name }}')
+        counter.push({{ s.count }})
+
+        r = parseInt(Math.random()*255)
+        g = parseInt(Math.random()*255)
+        b = parseInt(Math.random()*255)
+        colors.push(`rgba(${r}, ${g}, ${b}, 0.2)`)
+        borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`)
+      {% endfor %}
+    window.onload = function() {
+        const ctx = document.getElementById('myChart').getContext('2d')
+        loadChart(ctx, lables, counter, 'bar', colors, borderColors )
+      }
+    function loadChart( ctx, lables, counter, type, colors, borderColors) {
+         const myChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: lables,
+                    datasets: [{
+                        label: 'Thống kê số lượng ứng tuyển theo Ngành nghề',
+                        data: counter,
+                        backgroundColor: colors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        borderRadius: 10,
+
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+     }
+
+
+
+
+</script>
+{% endblock %}
